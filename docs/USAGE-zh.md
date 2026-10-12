@@ -1,5 +1,4 @@
 # 实战指南：用 asr-local 做听力作业
-**这是一坨石山，慎用*
 
 工具本身怎么用见 [README.zh-CN.md](../README.zh-CN.md)；这份文件只讲**流程**。
 
