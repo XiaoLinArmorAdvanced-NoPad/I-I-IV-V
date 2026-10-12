@@ -1,0 +1,34 @@
+# 依赖
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# 模型（228 MB，不进仓库；用 npm run setup 在本地下载）
+models/
+.cache/
+
+# 转写产物
+transcripts-all.txt
+*.transcript.txt
+
+# demo 音频：含第三方版权内容（教材题库），默认不入库；只保留说明文件
+demo/*
+!demo/README.md
+!demo/.gitkeep
+
+# 临时与系统文件
+tmp/
+*.tmp
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*~
+
+# 本地上传操作清单（含本机路径，不入库；GitHub 上已有安装步骤）
+UPLOAD.md
