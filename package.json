@@ -1,0 +1,62 @@
+{
+  "name": "asr-local",
+  "version": "1.0.0",
+  "description": "Offline audio transcription via sherpa-onnx + SenseVoice int8. No login, no API key, no network.",
+  "type": "module",
+  "main": "transcribe.js",
+  "bin": {
+    "asr-local": "transcribe.js"
+  },
+  "exports": {
+    ".": "./lib/paths.js",
+    "./wer": "./lib/wer.js"
+  },
+  "files": [
+    "transcribe.js",
+    "lib/",
+    "setup/",
+    "tests/",
+    "docs/",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "setup": "node setup/download-model.js",
+    "check": "node transcribe.js --check",
+    "test": "node tests/wer.test.js && node tests/links.test.js && node tests/benchmark.js && node tests/e2e-test.js",
+    "test:unit": "node tests/wer.test.js && node tests/links.test.js",
+    "test:links": "node tests/links.test.js",
+    "benchmark": "node tests/benchmark.js"
+  },
+  "keywords": [
+    "asr",
+    "speech-to-text",
+    "transcription",
+    "whisper-alternative",
+    "sensevoice",
+    "sherpa-onnx",
+    "offline",
+    "onnx",
+    "listening-comprehension",
+    "u-campus"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "sherpa-onnx-node": "^1.13.8"
+  },
+  "optionalDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/XiaoLinArmorAdvanced-NoPad/I-I-IV-V.git"
+  },
+  "bugs": {
+    "url": "https://github.com/XiaoLinArmorAdvanced-NoPad/I-I-IV-V/issues"
+  },
+  "homepage": "https://github.com/XiaoLinArmorAdvanced-NoPad/I-I-IV-V#readme"
+}
