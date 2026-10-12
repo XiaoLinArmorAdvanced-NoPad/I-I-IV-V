@@ -1,0 +1,9 @@
+{
+  "_comment": "Official reference transcripts for SenseVoice test_wavs. Ground truth for tests/benchmark.js and transcribe.js --check. setup/download-model.js writes these into <model>/test_wavs/*.txt, because the release tarball ships the .wav files but NOT the .txt files.",
+  "_source": "https://huggingface.co/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17",
+  "en": "The tribal chieftain called for the boy and presented him with 50 pieces of code.",
+  "zh": "开饭时间早上9点至下午5点。",
+  "ja": "うちの中学は弁当制で持っていきない場合は50円の学校販売のパンを買う。",
+  "ko": "조금만 생각을 하면서 살면 훨씬 편할 거야.",
+  "yue": "呢几个字都表达唔到我想讲嘅意思。"
+}

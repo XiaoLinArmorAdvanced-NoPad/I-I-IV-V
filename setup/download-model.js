@@ -17,7 +17,7 @@ import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import {
   ROOT, CACHE_DIR, MODELS_DIR, MODEL, TOKENS, TEST_WAVS,
-  MODEL_SHA256, TOKENS_SHA256,
+  MODEL_SHA256, TOKENS_SHA256, loadReference,
 } from '../lib/paths.js';
 
 /* 模型包的官方地址（k2-fsa release 资产） */
@@ -124,7 +124,25 @@ const verify = (file, expect, label) => {
 const okModel = verify(MODEL, MODEL_SHA256, 'model.int8.onnx');
 const okTokens = verify(TOKENS, TOKENS_SHA256, 'tokens.txt');
 const hasTests = fs.existsSync(TEST_WAVS);
-console.log('  ' + (hasTests ? '✅' : '⚠ ') + ' test_wavs（自检用）');
+console.log('  ' + (hasTests ? '✅' : '⚠ ') + ' test_wavs（样例音频）');
+
+/* ---------- 补写参考答案 ----------
+ * k2-fsa 的 tar 包只含 test_wavs/*.wav，不含 *.txt。
+ * 这里用仓库内的 lib/sensevoice-reference.json 把 .txt 补上，
+ * 让模型目录自洽（benchmark 已改为直接读 json，这里只是保持目录完整）。 */
+if (hasTests) {
+  const ref = loadReference();
+  if (ref.error) {
+    console.log('  ⚠ 无法读取参考文本，跳过补写: ' + ref.error);
+  } else {
+    let wrote = 0;
+    for (const [lg, text] of Object.entries(ref)) {
+      const p = path.join(TEST_WAVS, lg + '.txt');
+      if (!fs.existsSync(p)) { fs.writeFileSync(p, text + '\n', 'utf8'); wrote++; }
+    }
+    console.log('  ✅ 参考答案（补写 ' + wrote + ' 个 .txt，共 ' + Object.keys(ref).length + ' 种语言）');
+  }
+}
 
 if (okModel && okTokens) {
   try { fs.rmSync(CACHE_DIR, { recursive: true, force: true }); console.log('\n已清理缓存 .cache'); } catch (e) {}

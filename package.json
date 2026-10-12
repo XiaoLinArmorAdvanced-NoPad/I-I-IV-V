@@ -24,9 +24,10 @@
   "scripts": {
     "setup": "node setup/download-model.js",
     "check": "node transcribe.js --check",
-    "test": "node tests/wer.test.js && node tests/links.test.js && node tests/benchmark.js && node tests/e2e-test.js",
-    "test:unit": "node tests/wer.test.js && node tests/links.test.js",
+    "test": "node tests/wer.test.js && node tests/reference.test.js && node tests/links.test.js && node tests/benchmark.js && node tests/e2e-test.js",
+    "test:unit": "node tests/wer.test.js && node tests/reference.test.js && node tests/links.test.js",
     "test:links": "node tests/links.test.js",
+    "test:reference": "node tests/reference.test.js",
     "benchmark": "node tests/benchmark.js"
   },
   "keywords": [

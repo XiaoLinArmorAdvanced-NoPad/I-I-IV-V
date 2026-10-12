@@ -19,6 +19,7 @@ import { execFileSync } from 'node:child_process';
 import {
   ROOT, MODEL, TOKENS, TEST_WAVS, TMP_DIR,
   resolveFfmpeg, checkDeps, reportProblems, collectTargets,
+  loadReference, REF_LANGS,
 } from './lib/paths.js';
 import { wer, describeOps } from './lib/wer.js';
 
@@ -170,31 +171,45 @@ if (DO_CHECK) {
   console.log('    引擎版本    : sherpa-onnx ' + ((sherpa.default || sherpa).version || '?'));
   console.log('    识别器就绪  : ' + ((Date.now() - t0) / 1000).toFixed(2) + 's');
 
-  console.log('\n[2] 五语言准确度（对照模型自带官方参考文本）');
-  if (!fs.existsSync(TEST_WAVS)) {
-    console.log('    ⚠ 缺少 test_wavs，跳过（模型包未正确解压时会出现）');
+  console.log('\n[2] 五语言准确度（对照官方参考文本）');
+  let accFailed = false;
+  const reference = loadReference();
+  if (reference.error) {
+    console.log('    ❌ ' + reference.error);
+    accFailed = true;
+  } else if (!fs.existsSync(TEST_WAVS)) {
+    console.log('    ❌ 缺少样例音频目录: ' + TEST_WAVS);
+    console.log('       模型包未正确解压。执行 npm run setup 重新安装。');
+    accFailed = true;
   } else {
     const autoRec = LANG === 'auto' ? recognizer : makeRecognizer('auto');
-    let totD = 0, totR = 0, allExact = true, n = 0;
-    for (const lg of ['en', 'zh', 'ja', 'ko', 'yue']) {
+    let totD = 0, totR = 0, allExact = true, n = 0, skipped = [];
+    for (const lg of REF_LANGS) {
       const wav = path.join(TEST_WAVS, lg + '.wav');
-      const refFile = path.join(TEST_WAVS, lg + '.txt');
-      if (!fs.existsSync(wav) || !fs.existsSync(refFile)) { console.log('    ' + lg + ': 缺文件'); continue; }
-      const ref = fs.readFileSync(refFile, 'utf8').trim();
+      if (!reference[lg]) { skipped.push(lg + '(无参考文本)'); continue; }
+      if (!fs.existsSync(wav)) { skipped.push(lg + '(无音频)'); continue; }
       const wave = readWave(wav);
       const st = autoRec.createStream();
       st.acceptWaveform({ samples: wave.samples, sampleRate: wave.sampleRate });
       autoRec.decode(st);
       const got = autoRec.getResult(st).text.trim();
-      const w = wer(ref, got, lg === 'en');
+      const w = wer(reference[lg], got, lg === 'en');
       totD += w.distance; totR += w.refLen; n++;
       if (!w.exact) allExact = false;
       console.log('    ' + lg.toUpperCase() + '  ' + (w.rate * 100).toFixed(1) + '% 错误  ' +
         (w.exact ? '✅ 逐字一致' : '差异: ' + describeOps(w.ops)));
     }
     console.log('    ------------------------------------');
-    console.log('    ' + n + ' 种语言，' + totR + ' 单位，错误率 ' +
-      (totR ? (totD / totR * 100).toFixed(2) : 'N/A') + '%  ' + (allExact ? '✅ 全部通过' : '⚠ 有差异'));
+    if (skipped.length) console.log('    跳过: ' + skipped.join(', '));
+    if (n === 0) {
+      // 关键：一个语言都没测到，绝不能报"通过"——早期版本在这里误报成功
+      console.log('    ❌ 没有任何语言完成测试，准确度未经验证');
+      accFailed = true;
+    } else {
+      console.log('    ' + n + ' 种语言，' + totR + ' 单位，错误率 ' +
+        (totD / totR * 100).toFixed(2) + '%  ' + (allExact ? '✅ 全部通过' : '⚠ 有差异'));
+      if (!allExact || n < REF_LANGS.length) accFailed = true;
+    }
   }
 
   console.log('\n[3] 端到端（mp3 → wav → 转写）');
@@ -218,7 +233,11 @@ if (DO_CHECK) {
     console.log('    ' + r.text.slice(0, 100) + (r.text.length > 100 ? '…' : ''));
   }
 
-  console.log('\n完成。');
+  if (accFailed) {
+    console.log('\n❌ 自检未通过：准确度验证有问题，详见上面 [2] 段。');
+    process.exit(1);
+  }
+  console.log('\n完成，全部通过。');
   process.exit(0);
 }
 
