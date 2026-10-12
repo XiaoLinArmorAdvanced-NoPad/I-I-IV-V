@@ -2,6 +2,10 @@
 
 **Offline audio transcription. No login, no API key, no network.**
 
+**Backed by 蓝色大肥鱼 DeepSeek.**
+**Most of this README was written by DeepSeek too.**
+**If you can't figure out the install, just throw the link or the files at an AI.**
+
 [中文文档](README.zh-CN.md) · [Getting started (中文, Windows)](docs/GETTING-STARTED-zh.md) · [实战指南](docs/USAGE-zh.md)
 
 ```bash
@@ -143,6 +147,7 @@ Being honest about where it breaks:
 5. **Whole file is loaded into memory.** Fine for minutes-long clips; not designed for hour-long recordings.
 6. **No diarization, no punctuation restoration** — sherpa-onnx ships models for both
    (`OfflineSpeakerDiarization`, `OfflinePunctuation`) but they are not wired up here.
+   (So all of that is on you to build. UwU)
 
 ---
 

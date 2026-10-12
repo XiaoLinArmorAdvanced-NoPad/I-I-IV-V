@@ -1,6 +1,9 @@
 # asr-local
 
 **完全离线的音频转写。不需要登录、不需要 API Key、不联网。**
+**本代码由蓝色大肥鱼DeepSeek鼎力支持**
+**README其实大部分也是DS写的**
+**不会装那就把链接或者文件直接甩给AI就行了**
 
 [English](README.md) · [新手入门](docs/GETTING-STARTED-zh.md) · [实战指南](docs/USAGE-zh.md)
 
@@ -141,6 +144,7 @@ node transcribe.js --no-itn 讲座.mp3
 5. **整段读入内存。** 适合几分钟的音频，不是为小时级录音设计的。
 6. **未接入说话人分离与标点恢复** —— sherpa-onnx 有对应模型
    （`OfflineSpeakerDiarization`、`OfflinePunctuation`），但本项目还没接。
+   （所以这些全部需要你们自己搞UwU）
 
 ---
 
