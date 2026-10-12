@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: Verify on ${{ matrix.os }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [18, 20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Syntax check
+        shell: bash
+        run: |
+          for f in transcribe.js lib/paths.js lib/wer.js setup/download-model.js setup/download-model-modelscope.js tests/wer.test.js tests/links.test.js tests/benchmark.js tests/e2e-test.js; do
+            node --check "$f" && echo "OK   $f"
+          done
+
+      - name: Unit check (WER module)
+        run: node tests/wer.test.js
+
+      # 文档相对链接与锚点检查 —— 不需要模型，跑得快，先失败早发现
+      - name: Docs link check
+        run: node tests/links.test.js
+
+      - name: Download model
+        run: node setup/download-model.js
+
+      - name: Self check (accuracy + end-to-end)
+        run: node transcribe.js --check
+
+      - name: Benchmark (5 languages vs official ground truth)
+        run: node tests/benchmark.js
+
+      # e2e-test.js 依赖 Windows System.Speech 做 TTS 合成素材，
+      # 其他平台会自动跳过（退出码 0），显式限定在 Windows 上跑更有意义。
+      - name: End-to-end (TTS → MP3 → transcribe)
+        if: runner.os == 'Windows'
+        run: node tests/e2e-test.js
